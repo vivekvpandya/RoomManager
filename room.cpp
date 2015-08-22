@@ -4,7 +4,7 @@ Room::Room()
 {
 
 }
-
+//Room constructor to create a room
 Room::Room( QString roomName1,  QString roomDesc1, int portNum){
 
     roomName = roomName1;

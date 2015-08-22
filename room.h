@@ -10,7 +10,6 @@ class Room
 {
 
 
-
 public:
     Room();
 
