@@ -11,16 +11,18 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    //To connect signal raised by clicking on room in available room list to slot that contains function to display room details.
     connect(ui->availableRoomsListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
             this, SLOT(onAvailableRoomsListItemClicked(QListWidgetItem*)));
 
+    //Creating new TCP connection to communicate to client
     server = new QTcpServer(this);
 
     // whenever a user connects, it will emit signal
     connect(server, SIGNAL(newConnection()), this, SLOT(newConnection()));
 
     if(!server->listen(QHostAddress::Any, 15000))
-    {   // this message should be added tp GUI
+    {   // this message should be added to GUI
          qDebug() << "Server could not start";
     }
     else{
@@ -35,7 +37,7 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-
+//Function to create room and to add room to the list of available rooms
 void MainWindow::on_createBtn_clicked()
 {
 
@@ -57,7 +59,7 @@ void MainWindow::on_createBtn_clicked()
     MainWindow::rooms.insert(room.getRoomName(),room);
 
 }
-
+//Function to display room description when room is selected from available room list
 void MainWindow::onAvailableRoomsListItemClicked(QListWidgetItem *listItem){
 
    ui->infoPanelTextBox->clear();
@@ -79,7 +81,7 @@ void MainWindow::onAvailableRoomsListItemClicked(QListWidgetItem *listItem){
 
 }
 
-
+//Function to handle clients connecting to sockets and to send them list of available rooms
 void MainWindow::newConnection()
 {
     // Get socket for pending connection
@@ -90,9 +92,11 @@ void MainWindow::newConnection()
        Room room = i.value();
     responseString.append(room.getRoomName()+":"+QString::number(room.getPort())+"\n");
     }
-    QByteArray ba = responseString.toLatin1();
-    const char *c_str2 = ba.data();
-    socket->write(c_str2);
+    //To convert QString object to Character Pointer for Write Function of Socket.
+    QByteArray tempByteArray = responseString.toUtf8();
+    const char *tempChar = tempByteArray.data();
+    socket->write(tempChar);
+
     socket->flush();
 
     socket->waitForBytesWritten(3000);

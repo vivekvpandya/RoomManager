@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>Create room</string>
+     <string> Create room</string>
     </property>
     <widget class="QPushButton" name="createBtn">
      <property name="geometry">
@@ -145,7 +145,7 @@
      <x>0</x>
      <y>0</y>
      <width>668</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
