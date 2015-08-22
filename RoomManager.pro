@@ -14,11 +14,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    room.cpp \
-    tcpserver.cpp
+    room.cpp
 
 HEADERS  += mainwindow.h \
-    room.h \
-    tcpserver.h
+    room.h
 
 FORMS    += mainwindow.ui

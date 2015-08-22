@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include "room.h"
 #include <QListWidgetItem>
+#include <QTcpSocket>
+#include <QTcpServer>
 
 namespace Ui {
 class MainWindow;
@@ -20,11 +22,13 @@ public:
 private slots:
     void on_createBtn_clicked();
     void onAvailableRoomsListItemClicked(QListWidgetItem *listItem);
+    void newConnection();
 
 private:
     Ui::MainWindow *ui;
     int portNum = 10000;
     QHash<QString, Room> rooms;
+    QTcpServer *server;
 
 };
 
