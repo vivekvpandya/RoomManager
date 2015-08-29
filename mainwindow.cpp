@@ -85,12 +85,23 @@ void MainWindow::onAvailableRoomsListItemClicked(QListWidgetItem *listItem){
 void MainWindow::newConnection()
 {
     // Get socket for pending connection
+
+    while(server->hasPendingConnections()){
+
+        QTcpSocket *socket = server->nextPendingConnection();
+        connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
+        connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+
+    }
+
+
+/*
     QTcpSocket *socket = server->nextPendingConnection();
     QString responseString;
     QHash<QString, Room>::iterator i;
     for (i = MainWindow::rooms.begin(); i != MainWindow::rooms.end(); ++i){
        Room room = i.value();
-    responseString.append(room.getRoomName()+":"+QString::number(room.getPort())+"\n");
+    responseString.append(room.getRoomName()+":"+QString::number(room.getPort())+":");
     }
     //To convert QString object to Character Pointer for Write Function of Socket.
     QByteArray tempByteArray = responseString.toUtf8();
@@ -100,9 +111,76 @@ void MainWindow::newConnection()
     socket->flush();
 
     socket->waitForBytesWritten(3000);
-    socket->close();
+    */
+    //socket->close();
 
     //Note: The returned QTcpSocket object cannot be used from another thread.
     //If you want to use an incoming connection from another thread,
     //you need to override incomingConnection().
+}
+
+void MainWindow::readyRead(){
+    qDebug()<<"Ok";
+    QTcpSocket *socket = static_cast<QTcpSocket *>(sender());
+
+    while(socket->bytesAvailable()){
+
+        QString command = QString::fromLatin1(socket->readAll());
+        qDebug() << command << "Command ";
+
+        QStringList stringList = command.split(":",QString::SkipEmptyParts);
+
+        for (QStringList::iterator it = stringList.begin();
+                 it != stringList.end(); ++it) {
+            qDebug() << *it;
+        }
+
+        if(stringList.begin()->compare("getRoomDetails") == 0){
+
+            // need to send room details
+            QString responseString;
+            QHash<QString, Room>::iterator i;
+            for (i = MainWindow::rooms.begin(); i != MainWindow::rooms.end(); ++i){
+               Room room = i.value();
+            responseString.append(room.getRoomName()+":"+QString::number(room.getPort())+":");
+            }
+            //To convert QString object to Character Pointer for Write Function of Socket.
+            QByteArray tempByteArray = responseString.toUtf8();
+            const char *tempChar = tempByteArray.data();
+            socket->write(tempChar);
+
+            socket->flush();
+
+            socket->waitForBytesWritten(3000);
+        }
+        else if(stringList.begin()->compare("joinRoom") ==0) {
+            qDebug() <<"Logic works";
+            QString nickName = stringList.at(1);
+            QString roomName = stringList.at(2);
+           Room room = MainWindow::rooms[roomName];
+           room.addNickName(nickName);
+           rooms[roomName] = room;
+            qDebug() << nickName << " : " << roomName <<'\n';
+
+        }
+        else if(stringList.begin()->compare("leaveRoom") == 0){
+            QString nickName = stringList.at(1);
+            QString roomName = stringList.at(2);
+            Room room = MainWindow::rooms[roomName];
+            room.removeNickName(nickName);
+            rooms[roomName] = room;
+
+            qDebug() << nickName << " : " << roomName << "Leave room"<<'\n';
+
+
+        }
+    }
+}
+
+void MainWindow::disconnected(){
+
+    QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
+
+        socket->deleteLater();
+
 }

@@ -27,7 +27,8 @@ public:
     QSet<QString> getJoinedNickNames() const;
     void setJoinedNickNames(const QSet<QString> &joinedNickNames1);
 
-    void addNickName(const QString &nickName);
+    void addNickName(const QString &nickName) ;
+    void removeNickName(const QString &nickName);
 
 
 private:

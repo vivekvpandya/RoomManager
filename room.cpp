@@ -54,8 +54,13 @@ void Room::setJoinedNickNames(const QSet<QString> &joinedNickNames1)
     joinedNickNames = joinedNickNames1;
 }
 
-void Room::addNickName(const QString &nickName){
+void  Room::addNickName(const QString &nickName) {
 
     joinedNickNames.insert(nickName);
 
+}
+
+void Room::removeNickName(const QString &nickName){
+
+    joinedNickNames.remove(nickName);
 }
