@@ -51,9 +51,9 @@ void MainWindow::on_createBtn_clicked()
     qDebug() << room.getRoomDesc();
     qDebug() << room.getPort();
 
-    room.addNickName("Vivek");
-    room.addNickName("Dipesh");
-    room.addNickName("Haresh");
+   // room.addNickName("Vivek");
+   // room.addNickName("Dipesh");
+   // room.addNickName("Haresh");
     ui->availableRoomsListWidget->addItem(room.getRoomName());
 
     MainWindow::rooms.insert(room.getRoomName(),room);
