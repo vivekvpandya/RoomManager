@@ -3,7 +3,10 @@
 
 #include <QDebug>
 #include <QByteArray>
-
+#include "sample.h"
+#include "peer.h"
+#include <QNetworkInterface>
+#include "message.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -69,8 +72,9 @@ void MainWindow::onAvailableRoomsListItemClicked(QListWidgetItem *listItem){
     QString roomDiscussion = "Discussion topic: "+room.getRoomDesc()+"\n";
    // qDebug() << roomName;
     QString roomConnectedNicks = "Connected nicks: \n";
-    foreach (QString nick, room.getJoinedNickNames()) {
-       roomConnectedNicks.append(nick+"\n");
+
+    for (Peer peer: room.getJoinedNickNames()) {
+       roomConnectedNicks.append(peer.getNickName()+"\n");
     }
 
     ui->infoPanelTextBox->insertPlainText(roomName+"\n");
@@ -86,12 +90,50 @@ void MainWindow::newConnection()
 {
     // Get socket for pending connection
 
+  /*  Sample s;
+    s.message = "Hello classes!";
+    s.sender = "Vivek Pandya";
+*/
+  /* QHostAddress ownIPaddress;
+    foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost))
+            ownIPaddress = address;
+    }
+
+    Peer peer = Peer("Dipu Bhai",ownIPaddress);
+    Peer peer1 = Peer("LLVM_Ninja", ownIPaddress);
+
+
+Message message = Message(MessageType::RoomDetails);
+message.insertDataString("Hello World");
+message.insertDataString("C++ is difficult , but when you are used to it every thing becomes easy.");
+message.insertPeerObj(peer);
+message.insertPeerObj(peer1);
+*/
     while(server->hasPendingConnections()){
 
         QTcpSocket *socket = server->nextPendingConnection();
         connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
         connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+       /* QByteArray block;
+        QDataStream out(&block, QIODevice::ReadWrite);
+        out.setVersion(QDataStream::Qt_5_5);
+    //! [4] //! [6]
+        out << (quint16)0;
+        //out << s;
+        //out << peer;
+        out << message;
+        out.device()->seek(0);
 
+        out << (quint16)(block.size() - sizeof(quint16));
+    //! [6] //! [7]
+       qDebug()<<QString(block);
+       socket->write(block);
+       socket->flush();
+
+       socket->waitForBytesWritten(3000);
+       qDebug()<<"Here!";
+*/
     }
 
 
@@ -123,7 +165,96 @@ void MainWindow::readyRead(){
     qDebug()<<"Ok";
     QTcpSocket *socket = static_cast<QTcpSocket *>(sender());
 
-    while(socket->bytesAvailable()){
+    quint16 blockSize=0;
+    QDataStream in(socket);
+    in.setVersion(QDataStream::Qt_5_5);
+
+    if (blockSize == 0) {
+        if (socket->bytesAvailable() < (int)sizeof(quint16))
+            return;
+//! [8]
+
+//! [10]
+        in >> blockSize;
+    }
+
+    if (socket->bytesAvailable() < blockSize)
+        return;
+//! [10] //! [11]
+
+   // Sample sample;
+   // in >> sample;
+   // qDebug() << sample.message+"Message Recieved";
+   // qDebug()<<sample.sender+"From Sender ";
+   // Peer peer;
+    //in >> peer;
+
+    //qDebug() << peer.getNickName();
+    //qDebug() << peer.getpeerAddress();
+    Message message ;
+    in >> message;
+    MessageType mtype = message.getMessageType();
+    QByteArray block;
+    QDataStream out(&block, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_5_5);
+       //! [4] //! [6]
+           out << (quint16)0;
+           //out << s;
+           //out << peer;
+
+
+
+    if (mtype == MessageType::GetRoomDetails){
+        Message response = Message(MessageType::RoomDetails);
+        qDebug() <<"GetRoomDetails";
+        // Give all available rooms in reply
+        QHash<QString, Room>::iterator i;
+        for (i = MainWindow::rooms.begin(); i != MainWindow::rooms.end(); ++i){
+           Room room = i.value();
+           response.insertRoomObj(room);
+
+        }
+        out << response;
+        out.device()->seek(0);
+
+        out << (quint16)(block.size() - sizeof(quint16));
+    //! [6] //! [7]
+       qDebug()<<QString(block);
+       socket->write(block);
+       socket->flush();
+
+       socket->waitForBytesWritten(3000);
+
+    }
+    else if(mtype == MessageType::JoinRoom){
+         qDebug() <<"JoinRoom";
+         for(QString roomName: message.getDataStrings()){
+             Room room = MainWindow::rooms[roomName];
+            for(Peer peer: message.getPeerVector()){
+             room.addNickName(peer);
+            }
+
+             rooms[roomName] = room;
+         }
+
+    }
+    else if(mtype == MessageType::LeaveRoom){
+         qDebug() <<"LeaveRoom";
+         for(QString roomName: message.getDataStrings()){
+             Room room = MainWindow::rooms[roomName];
+            for(Peer peer: message.getPeerVector()){
+             room.removeNickName(peer);
+            }
+
+             rooms[roomName] = room;
+         }
+
+    }
+
+
+
+
+   /* while(socket->bytesAvailable()){
 
         QString command = QString::fromLatin1(socket->readAll());
         qDebug() << command << "Command ";
@@ -174,7 +305,7 @@ void MainWindow::readyRead(){
 
 
         }
-    }
+    } */
 }
 
 void MainWindow::disconnected(){

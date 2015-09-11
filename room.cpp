@@ -44,23 +44,56 @@ void Room::setRoomDesc(const QString &roomDesc1)
     roomDesc = roomDesc1;
 }
 
-QSet<QString> Room::getJoinedNickNames() const
+QSet<Peer> Room::getJoinedNickNames() const
 {
     return joinedNickNames;
 }
 
-void Room::setJoinedNickNames(const QSet<QString> &joinedNickNames1)
+void Room::setJoinedNickNames(const QSet<Peer> &joinedNickNames1)
 {
     joinedNickNames = joinedNickNames1;
 }
 
-void  Room::addNickName(const QString &nickName) {
+void  Room::addNickName(const Peer &nickName) {
 
     joinedNickNames.insert(nickName);
 
 }
 
-void Room::removeNickName(const QString &nickName){
+void Room::removeNickName(const Peer &nickName){
 
     joinedNickNames.remove(nickName);
+}
+
+
+QDataStream & operator << (QDataStream & stream, const Room &room){
+    stream << room.getRoomName();
+    stream << room.getRoomDesc();
+    stream << room.getPort();
+    QSet<Peer> joinedNicks = room.getJoinedNickNames();
+    int joinedNicksSize = joinedNicks.size();
+    stream << joinedNicksSize;
+    for(Peer peer: joinedNicks){
+        stream << peer;
+    }
+
+}
+QDataStream & operator >>(QDataStream & stream, Room &room){
+    QString roomName;
+    QString roomDesc;
+    int roomPort;
+    int joinedNickSize;
+    stream >> roomName;
+    room.setRoomName(roomName);
+    stream >> roomDesc;
+    room.setRoomDesc(roomDesc);
+    stream >> roomPort;
+    room.setPort(roomPort);
+
+    stream >> joinedNickSize;
+    Peer peerObj;
+    for(int i=0;i<joinedNickSize;i++){
+        stream >> peerObj;
+        room.addNickName(peerObj);
+    }
 }

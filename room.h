@@ -5,7 +5,7 @@
 #include <QString>
 #include <QHostAddress>
 #include <QSet>
-
+#include "peer.h"
 class Room
 {
 
@@ -24,11 +24,11 @@ public:
     int getPort() const;
     void setPort(int portNum);
 
-    QSet<QString> getJoinedNickNames() const;
-    void setJoinedNickNames(const QSet<QString> &joinedNickNames1);
+    QSet<Peer> getJoinedNickNames() const;
+    void setJoinedNickNames(const QSet<Peer> &joinedNickNames1);
 
-    void addNickName(const QString &nickName) ;
-    void removeNickName(const QString &nickName);
+    void addNickName(const Peer &nickName) ;
+    void removeNickName(const Peer &nickName);
 
 
 private:
@@ -41,8 +41,9 @@ private:
 
     // To hold list of nick names connected to this room
     // Need to change this to QSet
-    QSet<QString> joinedNickNames;
+    QSet<Peer> joinedNickNames; // Peer object do not define equals method.
 
 };
-
+QDataStream & operator <<( QDataStream & stream, const Room &room);
+QDataStream & operator >>(QDataStream & stream, Room & room);
 #endif // ROOM_H

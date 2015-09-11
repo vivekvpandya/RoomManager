@@ -14,9 +14,15 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    room.cpp
+    room.cpp \
+    sample.cpp \
+    peer.cpp \
+    message.cpp
 
 HEADERS  += mainwindow.h \
-    room.h
+    room.h \
+    sample.h \
+    peer.h \
+    message.h
 
 FORMS    += mainwindow.ui
