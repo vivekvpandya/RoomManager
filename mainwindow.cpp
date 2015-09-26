@@ -6,6 +6,7 @@
 #include "sample.h"
 #include "peer.h"
 #include <QNetworkInterface>
+#include <QMessageBox>
 #include "message.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -41,11 +42,27 @@ MainWindow::~MainWindow()
     delete ui;
 }
 //Function to create room and to add room to the list of available rooms
-void MainWindow::on_createBtn_clicked()
+int MainWindow::on_createBtn_clicked()
 {
 
     QString roomDesc = ui->roomDesc->text();
     QString roomName = ui->roomName->text();
+    if(roomName.isEmpty() == true){
+        QMessageBox box;
+        box.setText("Oops! Room Name empty.Please enter valid Room Name.");
+        box.exec();
+        return -1;
+
+    }
+
+    if(rooms.contains(roomName) == true)
+    {
+        QMessageBox box;
+        box.setText("Sorry! Room Name already occupied.");
+        box.exec();
+        return -1;
+    }
+
 
     int portNumber = MainWindow::portNum++;
     Room room = Room( roomName, roomDesc, portNumber );
@@ -60,6 +77,7 @@ void MainWindow::on_createBtn_clicked()
     ui->availableRoomsListWidget->addItem(room.getRoomName());
 
     MainWindow::rooms.insert(room.getRoomName(),room);
+return 0;
 
 }
 //Function to display room description when room is selected from available room list
@@ -68,10 +86,10 @@ void MainWindow::onAvailableRoomsListItemClicked(QListWidgetItem *listItem){
    ui->infoPanelTextBox->clear();
     Room room = MainWindow::rooms.value(listItem->text());
     QString roomName = "Room name: "+room.getRoomName()+"\n";
-    QString roomPort = "Listining port: "+QString::number(room.getPort())+"\n";
+    QString roomPort = "Listening port: "+QString::number(room.getPort())+"\n";
     QString roomDiscussion = "Discussion topic: "+room.getRoomDesc()+"\n";
    // qDebug() << roomName;
-    QString roomConnectedNicks = "Connected nicks: \n";
+    QString roomConnectedNicks = "Connected Nicks: \n";
 
     for (Peer peer: room.getJoinedNickNames()) {
        roomConnectedNicks.append(peer.getNickName()+"\n");
@@ -197,7 +215,6 @@ void MainWindow::readyRead(){
     QByteArray block;
     QDataStream out(&block, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_5_5);
-       //! [4] //! [6]
            out << (quint16)0;
            //out << s;
            //out << peer;

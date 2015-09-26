@@ -20,7 +20,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_createBtn_clicked();
+    int on_createBtn_clicked();
     void onAvailableRoomsListItemClicked(QListWidgetItem *listItem);
     void newConnection();
     void disconnected();
