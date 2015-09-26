@@ -229,6 +229,7 @@ void MainWindow::readyRead(){
     else if(mtype == MessageType::JoinRoom){
          qDebug() <<"JoinRoom";
          for(QString roomName: message.getDataStrings()){
+             qDebug() << roomName +"Room name received";
              Room room = MainWindow::rooms[roomName];
             for(Peer peer: message.getPeerVector()){
              room.addNickName(peer);

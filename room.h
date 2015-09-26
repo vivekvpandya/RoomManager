@@ -29,6 +29,7 @@ public:
 
     void addNickName(const Peer &nickName) ;
     void removeNickName(const Peer &nickName);
+    bool checkNickNameAvailability(QString nickName);
 
 
 private:

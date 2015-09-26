@@ -12,6 +12,9 @@ enum class MessageType{
     JoinRoom,
     LeaveRoom,
     Message,
+    ChekNickAvailability,
+    NickAvailable,
+    NickRegistered
 };
 
 QDataStream & operator <<( QDataStream & stream, const MessageType &type);

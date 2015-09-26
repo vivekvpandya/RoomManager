@@ -65,6 +65,15 @@ void Room::removeNickName(const Peer &nickName){
     joinedNickNames.remove(nickName);
 }
 
+bool Room::checkNickNameAvailability(QString nickName){
+    for(Peer peer:joinedNickNames){
+        if(peer.getNickName().compare(nickName) == 0){
+            return false;
+        }
+
+    }
+    return true;
+}
 
 QDataStream & operator << (QDataStream & stream, const Room &room){
     stream << room.getRoomName();
