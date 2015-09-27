@@ -3,7 +3,7 @@
 
 #include <QDebug>
 #include <QByteArray>
-#include "sample.h"
+
 #include "peer.h"
 #include <QNetworkInterface>
 #include <QMessageBox>
@@ -42,6 +42,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 //Function to create room and to add room to the list of available rooms
+/* *** This is a slot responsible to handle clicked signal sent by create button.
+ * The slot will read details from the text fields and creates a Room object and added it to rooms collection.
+ * */
 int MainWindow::on_createBtn_clicked()
 {
 
@@ -81,6 +84,9 @@ return 0;
 
 }
 //Function to display room description when room is selected from available room list
+/* This is a slot responsible to handle click signal sent by availableRoomsListWidget from ui.
+ * It will print the information for the selected room from the rooms collection.
+ * */
 void MainWindow::onAvailableRoomsListItemClicked(QListWidgetItem *listItem){
 
    ui->infoPanelTextBox->clear();
@@ -104,6 +110,9 @@ void MainWindow::onAvailableRoomsListItemClicked(QListWidgetItem *listItem){
 }
 
 //Function to handle clients connecting to sockets and to send them list of available rooms
+/* This is a slot responsible to handle newConnection signal sent by QTcpServer reference.
+ * It binds readyRead and disconnected signals of connected socket with this class’s slots for readRead and disconnected.
+ * */
 void MainWindow::newConnection()
 {
     // Get socket for pending connection
@@ -179,6 +188,9 @@ message.insertPeerObj(peer1);
     //you need to override incomingConnection().
 }
 
+/*This slot will be triggered when any connected socket receives any data.
+ *  It will modify the server data structures according to message type received.
+ * */
 void MainWindow::readyRead(){
     qDebug()<<"Ok";
     QTcpSocket *socket = static_cast<QTcpSocket *>(sender());
@@ -326,6 +338,9 @@ void MainWindow::readyRead(){
     } */
 }
 
+/* This slot will be triggered in response to connected socket’s disconnect signal
+ * and it will delete the closed socket.
+ * */
 void MainWindow::disconnected(){
 
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
